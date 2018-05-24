@@ -152,9 +152,13 @@ module.exports = function staticCache(dir, options, files) {
 
     // 设置cache-control，默认是public，max-age=xxx
     // public：表明任何情况下都得缓存该资源（即使需要HTTP认证的资源）
-    // max-age：告诉
+    // max-age：告诉客户端该资源在xxx秒内是新鲜的，无需向服务器发请求
+    // no-cache：不直接使用缓存，要想服务器发起请求（新鲜度校验）
+    // no-store：所有文件都不会被保存到缓存或Internet临时文件中
     ctx.set('cache-control', file.cacheControl || 'public, max-age=' + file.maxAge)
 
+    // content-md5标头和md5校验
+    // 保证文件内容不会被任意篡改
     if (file.md5) {
       ctx.set('content-md5', file.md5)
     }
