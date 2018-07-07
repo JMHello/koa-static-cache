@@ -147,7 +147,24 @@ module.exports = function staticCache(dir, options, files) {
       return ctx.status = 304
     }
 
-    ctx.type = file.type
+    var filePath = file.path
+    var fileType = file.type
+
+    // 判断是否支持webp格式图片
+    if (/\.(png|jpg)\.webp/g.test(filePath)) {
+      var webpShow = ctx.cookies.get('webp_show')
+      if (!webpShow) {
+        filePath = filePath.replace(/\.webp$/, '')
+
+        var etc = path.extname(filePath)
+
+        fileType = (
+          etc == '.png' ? 'image/png': 'image/jpeg'
+        )
+      }
+    }
+
+    ctx.type = fileType
     ctx.length = file.zipBuffer ? file.zipBuffer.length : file.length
 
     // 设置cache-control，默认是public，max-age=xxx
@@ -201,7 +218,7 @@ module.exports = function staticCache(dir, options, files) {
       return
     }
 
-    var stream = fs.createReadStream(file.path)
+    var stream = fs.createReadStream(filePath)
 
     // update file hash
     // 更新文件的hash
